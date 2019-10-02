@@ -330,9 +330,12 @@ class ReactionHandler extends ReactionCollector {
 	 */
 	async _queueEmojiReactions(emojis) {
 		if (this.message.deleted) return this.stop();
-		if (this.ended) return this.message.reactions.removeAll();
-		await this.message.react(emojis.shift());
-		if (emojis.length) return this._queueEmojiReactions(emojis);
+		const clientPermissions = this.message.channel.permissionsFor(this.message.client);
+		if (clientPermissions.has('MANAGE_MESSAGES')) {
+			if (this.ended) return this.message.reactions.removeAll();
+			await this.message.react(emojis.shift());
+			if (emojis.length) return this._queueEmojiReactions(emojis);
+		}
 		this.reactionsDone = true;
 		return null;
 	}
